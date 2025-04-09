@@ -6,15 +6,15 @@ import pkg_resources
 import itertools
 
 
-T = TypeVar("T")
+_T = TypeVar("T")
 
 
-class _PluginProvider(Generic[T]):
+class _PluginProvider(Generic[_T]):
 
-    def __init__(self, klass: Type[T]):
+    def __init__(self, klass: Type[_T]):
         self._klass = klass
 
-    def using(self, *args: str) -> Iterable[Type[T]]:
+    def using(self, *args: str) -> Iterable[Type[_T]]:
         """
         Use the given entrypoint to create a plugin provider.
         """
