@@ -14,7 +14,7 @@ class _PluginProvider(Generic[T]):
     def __init__(self, klass: Type[T]):
         self._klass = klass
 
-    def using(self, *args: str, **kwargs) -> Iterable[T]:
+    def using(self, *args: str) -> Iterable[Type[T]]:
         """
         Use the given entrypoint to create a plugin provider.
         """
@@ -22,8 +22,7 @@ class _PluginProvider(Generic[T]):
             klass = ep.load()
             if not inspect.isclass(klass) or not issubclass(klass, self._klass):
                 continue
-
-            yield klass(*args, **kwargs)
+            yield klass
 
 
 loader = _PluginProvider
