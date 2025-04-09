@@ -1,28 +1,28 @@
-__all__ = ["loader"]
+__all__ = ["plugins"]
 
-from typing import Type, Iterable, Generic, TypeVar
 import inspect
-import pkg_resources
 import itertools
+import pkg_resources
+from typing import Type, Iterable
 
 
-_T = TypeVar("T")
+class _PluginProvider[T]:
+    """
+    A plugin provider that uses entry points to load plugins.
+    """
 
-
-class _PluginProvider(Generic[_T]):
-
-    def __init__(self, klass: Type[_T]):
+    def __init__(self, klass: Type[T]):
+        super().__init__()
         self._klass = klass
 
-    def using(self, *args: str) -> Iterable[Type[_T]]:
+    def using(self, *args: str) -> Iterable[Type[T]]:
         """
-        Use the given entrypoint to create a plugin provider.
+        Iterate over all plugins.
         """
-        for ep in itertools.chain(map(pkg_resources.iter_entry_points, args)):
-            klass = ep.load()
-            if not inspect.isclass(klass) or not issubclass(klass, self._klass):
-                continue
-            yield klass
+        for entry_point in itertools.chain(map(pkg_resources.iter_entry_points, args)):
+            klass = entry_point.load()
+            if inspect.isclass(klass) and (issubclass(klass, T) or klass is T):
+                yield klass
 
 
-loader = _PluginProvider
+plugins = _PluginProvider
