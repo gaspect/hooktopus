@@ -1,8 +1,7 @@
 __all__ = ["plugins"]
 
 import inspect
-import itertools
-import pkg_resources
+from importlib import metadata
 from typing import Type, Iterable
 
 
@@ -15,14 +14,20 @@ class _PluginProvider[T]:
         super().__init__()
         self._klass = klass
 
+    @classmethod
+    def of(cls, klass: Type[T]) -> "_PluginProvider[T]":
+        return cls(klass)
+
     def using(self, *args: str) -> Iterable[Type[T]]:
         """
         Iterate over all plugins.
         """
-        for entry_point in itertools.chain(map(pkg_resources.iter_entry_points, args)):
-            klass = entry_point.load()
-            if inspect.isclass(klass) and (issubclass(klass, T) or klass is T):
-                yield klass
+        for group in args:
+            eps = metadata.entry_points(group=group)
+            for name in eps.names:
+                klass = eps[name].load()
+                if inspect.isclass(klass) and issubclass(klass, self._klass):
+                    yield klass
 
 
 plugins = _PluginProvider
