@@ -5,7 +5,7 @@ from importlib import metadata
 from typing import Type, Iterable
 
 
-class _PluginProvider[T]:
+class Plugins[T]:
     """
     A plugin provider that uses entry points to load plugins.
     """
@@ -15,7 +15,7 @@ class _PluginProvider[T]:
         self._klass = klass
 
     @classmethod
-    def of(cls, klass: Type[T]) -> "_PluginProvider[T]":
+    def of(cls, klass: Type[T]) -> "Plugins[T]":
         return cls(klass)
 
     def using(self, *args: str) -> Iterable[Type[T]]:
@@ -28,6 +28,3 @@ class _PluginProvider[T]:
                 klass = eps[name].load()
                 if inspect.isclass(klass) and issubclass(klass, self._klass):
                     yield klass
-
-
-plugins = _PluginProvider
